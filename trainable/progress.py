@@ -47,7 +47,7 @@ class ProgressManager(object):
 
             for i, key in enumerate(self.metrics):
                 metric = sum(self.metrics[key]) / len(self.metrics[key])
-                description += f"{key}: {metric}:.2f"
+                description += f"{key}: {metric:.2f}"
                 description += ", " if i != len(self.metrics) - 1 else ""
 
             self.loop.update(1)

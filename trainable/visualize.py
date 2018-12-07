@@ -8,7 +8,7 @@ from trainable.test import *
 
 
 class Visualizer(object):
-    def __init__(self, frequency=1, batch=True, padding=0, debug=False):
+    def __init__(self, frequency=1, batch=True, padding=0):
         super().__init__()
         self.__dict__.update(locals())
         self.counter = 0
@@ -50,7 +50,6 @@ class Plotter(Visualizer):
 
     def visualize_batch(self, model, batch, device):
         with torch.no_grad():
-            model = model.to(device).eval()
             imgs = model(batch.to(device))
 
             n_imgs = imgs.size(0)
