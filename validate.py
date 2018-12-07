@@ -27,7 +27,6 @@ class ValidationManager(object):
             self.counter = 0
             metrics = self._validate(session, data, device)
             session.append_metrics(metrics)
-
             return True
         else:
             return False
@@ -35,7 +34,6 @@ class ValidationManager(object):
     def _validate(self, session, data, device):
         with torch.no_grad():
             model = session.model
-            model = model.to(device)
             model.eval()
             metrics = defaultdict(lambda: 0.0)
 
