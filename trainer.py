@@ -5,12 +5,14 @@ from epoch import DefaultTrainingEpoch
 from algorithm import DummyAlgorithm
 from session import AutoSession
 
+import torch
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 
 import os
 import test
 import shutil
+
 
 class Trainer(object):
     """Trainer(**args)
@@ -100,21 +102,21 @@ class Trainer(object):
 
         self.epoch.loop = self.loop
         self.epoch.train = args.pop('train_alg', DummyAlgorithm())
-        self.validation = ValidationManager(args.pop('test_alg', DummyAlgorithm(validate=True)))
+        self.validation = ValidationManager(args.pop('test_alg', DummyAlgorithm(eval=True)))
 
         self.set_display_frequency(args.pop('display_freq', 1))
         self.set_visualize_frequency(args.pop('visualize_freq', 1))
         self.set_validation_frequency(args.pop('validate_freq', 1))
 
         self.autosave_freq = args.pop('autosave_freq', 1)
-
+        self.device = args.pop('device', torch.device('cpu'))
         self.session = None
 
     ##############################################################################
     # Training API                                                               #
     ##############################################################################
 
-    def train(self, train_data, test_data, epochs, device):
+    def train(self, train_data, test_data, epochs):
         """Train a model on a set of data.
 
         Args:
@@ -123,7 +125,6 @@ class Trainer(object):
           test_data (torch.utils.data.DataLoader): The DataLoader containing the
             validation data
           epochs (int): How many epochs to train for
-          device (torch.device): Which hardware device to train on.
 
         Returns:
             (dict): A dictionary containing titled metrics measured throughout training
@@ -131,16 +132,13 @@ class Trainer(object):
         if self.session is None:
             raise AssertionError('No session found. Use "start_session, load_session, or new_session before training')
 
-        epochs_left = epochs - self.session.epoch
-        self.loop.start(total=len(train_data)*epochs_left,
-                        cur=len(train_data)*self.session.epoch)
-
+        self.loop.start(total=len(train_data)*epochs)
         self.session.resume()
 
-        while self.session.epoch < epochs:
+        for _ in range(epochs):
             self.session.next_epoch()
-            self.validation(self.session, test_data, device)
-            self.epoch(self.session, train_data, device)
+            self.validation(self.session, test_data, self.device)
+            self.epoch(self.session, train_data, self.device)
             self.session.save()
 
         self.loop.end()
@@ -224,6 +222,9 @@ class Trainer(object):
     # Tunable Behaviors                                                          #
     ##############################################################################
 
+    def to(self, device):
+        self.device = device
+
     def set_display_frequency(self, frequency):
         """Set how often the progress manager updates loss information in batches."""
         self.loop.set_frequency(frequency)
@@ -245,18 +246,18 @@ class Trainer(object):
 def trainer_test():
     if os.path.exists('./trainer_test'):
         shutil.rmtree('./trainer_test')
-
-
     test.title("Trainer")
 
-    model = test.Model()
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = test.Model().to(device)
     optim = Adam(model.parameters(), 1e-4)
     train_data = DataLoader(test.Dataset(), batch_size=4)
     test_data = DataLoader(test.Dataset(), batch_size=4)
 
+    # set up training session
     trainer = Trainer(
         train_alg=DummyAlgorithm(),
-        test_alg=DummyAlgorithm(validate=True),
+        test_alg=DummyAlgorithm(eval=True),
         visualizer=Saver('./trainer_test/samples'),
         display_freq=100,
         visualize_freq=100,
@@ -264,11 +265,13 @@ def trainer_test():
         validate_freq=1
     )
 
+    trainer.to(device)
     trainer.start_session(model, optim, './trainer_test/test.sesh')
     trainer.name_session('TEST')
     trainer.describe_session('THIS IS A TEST')
-    trainer.train(train_data, test_data, 10, test.device('cuda'))
+    trainer.train(train_data, test_data, 10)
 
+    # TEST 1
     test.subtest(1, "Basic Session Functionality")
     session = trainer.get_session()
     passed = True
@@ -280,15 +283,43 @@ def trainer_test():
     passed = passed if session.optim == optim else False
     passed = passed if session.model == model else False
     passed = passed if len(os.listdir('trainer_test/samples')) == 25 else False
-
     test.evaluate(passed)
 
     test.subtest(2, "Session Saved")
+    model = test.Model().to(device)
+    optim = Adam(model.parameters(), 1e-4)
+    trainer = Trainer(
+        train_alg=DummyAlgorithm(),
+        test_alg=DummyAlgorithm(eval=True),
+        visualizer=Saver('./trainer_test/samples'),
+        display_freq=100,
+        visualize_freq=100,
+        autosave_freq=1,
+        validate_freq=1
+    )
+    trainer.to(device)
 
+    # TEST 2
+    trainer.start_session(model, optim, './trainer_test/test.sesh')
+    session = trainer.get_session()
+    passed = True
+    passed = passed if session.epoch == 10 else False
+    passed = passed if session.name == 'TEST' else False
+    passed = passed if session.description == 'THIS IS A TEST' else False
+    passed = passed if 'Mean' in session.metrics else False
+    passed = passed if 'Validation Mean' in session.metrics else False
+    passed = passed if session.optim == optim else False
+    passed = passed if session.model == model else False
+    test.evaluate(passed)
 
-
+    # TEST 3
+    test.subtest(3, "Continued Training")
+    trainer.train(train_data, test_data, 10)
+    test.evaluate(session.epoch == 20)
     test.end()
 
+    if os.path.exists('./trainer_test'):
+        shutil.rmtree('./trainer_test')
 
 
 if __name__ == '__main__':
