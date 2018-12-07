@@ -1,8 +1,16 @@
 import torch
 
+
 class Algorithm(object):
+    def __init__(self, eval=False):
+        super().__init__()
+        self.__dict__.update(locals())
+
     def __call__(self, *args, **kwargs):
         raise NotImplementedError
+
+    def key(self, key):
+        return ('Validation ' if self.eval else '') + key
 
 
 class DummyAlgorithm(Algorithm):
@@ -22,5 +30,3 @@ class DummyAlgorithm(Algorithm):
 
         return {self.key('Mean'): loss.item()}
 
-    def key(self, key):
-        return ('Validation ' if self.eval else '') + key
