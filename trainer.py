@@ -74,6 +74,7 @@ class Trainer(object):
       A Typical workflow looks like the following:
 
         model = YourModel()
+        model = model.to(device)
         optim = YourOptim(model.parameters(), ...)
         train_data = DataLoader(training_dataset, ...)
         test_data = DataLoader(testing_dataset, ...)
@@ -85,13 +86,14 @@ class Trainer(object):
           display_freq=...,
           visualize_freq=...,
           autosave_freq=...,
-          validate_freq=...
+          validate_freq=...,
+          device=...
         )
 
         trainer.new_session(model, optim, path)
         trainer.name_session('Name')
         trainer.describe_session('Description')
-        trainer.train(train_data, test_data, epochs, torch.device('cuda'))
+        trainer.train(train_data, test_data, epochs)
     """
 
     def __init__(self, **args):
