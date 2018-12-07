@@ -1,11 +1,16 @@
 from progress import ProgressManager
-from visualize import Plotter
+from validate import ValidationManager
+from visualize import Plotter, Saver
 from epoch import DefaultTrainingEpoch
 from algorithm import DummyAlgorithm
 from session import AutoSession
 
-import os
+from torch.utils.data import DataLoader
+from torch.optim import Adam
 
+import os
+import test
+import shutil
 
 class Trainer(object):
     """Trainer(**args)
@@ -90,17 +95,18 @@ class Trainer(object):
     def __init__(self, **args):
         super().__init__()
         self.loop = ProgressManager()
-        self.visualize = args.pop('visualizer', Plotter())
         self.epoch = args.pop('training_epoch', DefaultTrainingEpoch())
+        self.epoch.set_visualizer(args.pop('visualizer', Plotter()))
 
         self.epoch.loop = self.loop
         self.epoch.train = args.pop('train_alg', DummyAlgorithm())
-        self.validation = args.pop('test_alg', DummyAlgorithm(validate=True))
+        self.validation = ValidationManager(args.pop('test_alg', DummyAlgorithm(validate=True)))
 
         self.set_display_frequency(args.pop('display_freq', 1))
         self.set_visualize_frequency(args.pop('visualize_freq', 1))
-        self.set_autosave_frequency(args.pop('autosave_freq', 1))
         self.set_validation_frequency(args.pop('validate_freq', 1))
+
+        self.autosave_freq = args.pop('autosave_freq', 1)
 
         self.session = None
 
@@ -126,16 +132,19 @@ class Trainer(object):
             raise AssertionError('No session found. Use "start_session, load_session, or new_session before training')
 
         epochs_left = epochs - self.session.epoch
-        self.loop.start(total=len(train_data) * epochs_left,
-                        cur=len(train_data) * self.session.epoch)
+        self.loop.start(total=len(train_data)*epochs_left,
+                        cur=len(train_data)*self.session.epoch)
+
+        self.session.resume()
 
         while self.session.epoch < epochs:
+            self.session.next_epoch()
             self.validation(self.session, test_data, device)
             self.epoch(self.session, train_data, device)
             self.session.save()
-            self.session.next_epoch()
 
         self.loop.end()
+        self.session.suspend()
 
         return self.session.metrics
 
@@ -153,7 +162,7 @@ class Trainer(object):
             load the session from.
         """
 
-        if os.path.exists(path):
+        if not os.path.exists(path):
             self.new_session(model, optim, path)
         else:
             self.load_session(model, optim, path)
@@ -161,11 +170,13 @@ class Trainer(object):
     def new_session(self, model, optim, path):
         """Begin a new training session."""
         self.session = AutoSession(model, optim, path)
+        self.session.set_frequency(self.autosave_freq)
 
     def load_session(self, model, optim, path):
         """Load an existing training session."""
         self.session = AutoSession(model, optim)
         self.session.load(path)
+        self.session.set_frequency(self.autosave_freq)
 
     def name_session(self, name):
         """Give your session a name."""
@@ -174,6 +185,9 @@ class Trainer(object):
     def describe_session(self, description):
         """Give your session a more in depth description."""
         self.session.describe(description)
+
+    def get_session(self):
+        return self.session
 
     ##############################################################################
     # Configurable Elements                                                      #
@@ -216,13 +230,66 @@ class Trainer(object):
 
     def set_visualize_frequency(self, frequency):
         """Set how often to sample visuals, in batches."""
-        self.visualize.frequency = frequency
+        self.epoch.visualize.frequency = frequency
 
     def set_autosave_frequency(self, frequency):
         """Set how often the session saves in epochs."""
+        self.autosave_freq = frequency
         self.session.set_frequency(frequency)
 
     def set_validation_frequency(self, frequency):
         """Set how often validation is performed, in epochs."""
         self.validation.set_frequency(frequency)
 
+
+def trainer_test():
+    if os.path.exists('./trainer_test'):
+        shutil.rmtree('./trainer_test')
+
+
+    test.title("Trainer")
+
+    model = test.Model()
+    optim = Adam(model.parameters(), 1e-4)
+    train_data = DataLoader(test.Dataset(), batch_size=4)
+    test_data = DataLoader(test.Dataset(), batch_size=4)
+
+    trainer = Trainer(
+        train_alg=DummyAlgorithm(),
+        test_alg=DummyAlgorithm(validate=True),
+        visualizer=Saver('./trainer_test/samples'),
+        display_freq=100,
+        visualize_freq=100,
+        autosave_freq=1,
+        validate_freq=1
+    )
+
+    trainer.start_session(model, optim, './trainer_test/test.sesh')
+    trainer.name_session('TEST')
+    trainer.describe_session('THIS IS A TEST')
+    trainer.train(train_data, test_data, 10, test.device('cuda'))
+
+    test.subtest(1, "Basic Session Functionality")
+    session = trainer.get_session()
+    passed = True
+    passed = passed if session.epoch == 10 else False
+    passed = passed if session.name == 'TEST' else False
+    passed = passed if session.description == 'THIS IS A TEST' else False
+    passed = passed if 'Mean' in session.metrics else False
+    passed = passed if 'Validation Mean' in session.metrics else False
+    passed = passed if session.optim == optim else False
+    passed = passed if session.model == model else False
+    passed = passed if len(os.listdir('trainer_test/samples')) == 25 else False
+
+    test.evaluate(passed)
+
+    test.subtest(2, "Session Saved")
+
+
+
+    test.end()
+
+
+
+if __name__ == '__main__':
+    trainer_test()

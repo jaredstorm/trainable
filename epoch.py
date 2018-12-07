@@ -22,12 +22,19 @@ class DefaultTrainingEpoch(TrainingEpoch):
         super().__init__()
         self.loop = None
         self.train = None
+        self.visualize = None
 
     def set_algorithm(self, algorithm):
         self.train = algorithm
 
     def get_algorithm(self):
         return self.train
+
+    def set_visualizer(self, visualizer):
+        self.visualize = visualizer
+
+    def get_visualizer(self):
+        return self.visualize
 
     def __call__(self, session, data, device):
         model, optim = session.model, session.optim
@@ -37,6 +44,7 @@ class DefaultTrainingEpoch(TrainingEpoch):
             optim.step()
 
             session.append_metrics(metrics)
+            self.visualize(session.model, batch, device)
             self.loop.update(session.epoch, metrics)
 
 

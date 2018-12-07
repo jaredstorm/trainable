@@ -123,7 +123,7 @@ def progress_manager_test():
     except Exception as e:
         evaluate(False)
 
-    end_tests()
+    end()
 
 
 if __name__ == '__main__':

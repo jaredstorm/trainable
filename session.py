@@ -73,7 +73,7 @@ class Session(object):
             raise AttributeError("Model and Optimizer not set. Set them before resuming/suspending a session.")
 
         if not self.resumed:
-            self.next_epoch()
+            # self.next_epoch()
             self.resumed = True
 
     def suspend(self):
@@ -104,7 +104,7 @@ class Session(object):
         """Load a session from a file."""
 
         if not os.path.exists(path):
-            raise ValueError(f"Path {path} does not exist. Did you mistype any subfolders?")
+            raise ValueError(f"Path '{path}' does not exist. Did you mistype any subfolders?")
 
         session = torch.load(path)
 
@@ -168,7 +168,7 @@ class AutoSession(Session):
 
     def _save(self, path):
         if not os.path.exists(os.path.dirname(path)):
-            os.mkdir(os.path.dirname(path))
+            os.makedirs(os.path.dirname(path))
 
         session = {
             'name': self.name,
@@ -211,7 +211,7 @@ def session_test():
     passed = True
     passed = passed if session.name == "TEST" else False
     passed = passed if session.description == "A TEST" else False
-    passed = passed if session.epoch == 1 else False
+    passed = passed if session.epoch == 0 else False
     passed = passed if session.resumed == False else False
     evaluate(passed)
 
@@ -236,7 +236,7 @@ def session_test():
     passed = passed if session2.resumed == False else False
     evaluate(passed)
 
-    end_tests()
+    end()
 
 
 def autosession_test():
@@ -301,7 +301,7 @@ def autosession_test():
     passed = passed if session2.metrics['Validation'][-1] == 2 else False
     evaluate(passed)
 
-    end_tests()
+    end()
     shutil.rmtree('./test_folder')
 
 

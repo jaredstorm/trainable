@@ -1,3 +1,4 @@
+import torch
 
 class Algorithm(object):
     def __call__(self, *args, **kwargs):
@@ -13,7 +14,11 @@ class DummyAlgorithm(Algorithm):
 
     def __call__(self, model, batch, device):
         y = model(batch.to(device))
-        loss = y.mean()
+        loss = torch.mean(y)
+
+        if not self.validate:
+            loss.backward()
+
         return {self.key('Mean'): loss.item()}
 
     def key(self, key):

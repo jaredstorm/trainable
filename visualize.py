@@ -95,7 +95,7 @@ class Saver(Visualizer):
         self.__dict__.update(locals())
 
         if not os.path.exists(image_folder):
-            os.mkdir(image_folder)
+            os.makedirs(image_folder)
 
         files = os.listdir(image_folder)
         files = [f for f in files if 'sample' in f.lower()]
@@ -181,7 +181,7 @@ def plotter_test():
     evaluate(passed)
     plot(model, batch, device)
 
-    end_tests()
+    end()
 
 
 def saver_test():
@@ -196,7 +196,7 @@ def saver_test():
     title("saver")
 
     model = torch.nn.Conv2d(3, 3, kernel_size=3, padding=1)
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda'  if torch.cuda.is_available() else 'cpu')
     batch = torch.randn(16, 3, 16, 16)
 
     subtest(1, "Batch Functionality")
@@ -225,7 +225,7 @@ def saver_test():
     evaluate(passed)
     show('saver_tests/sample-2.png')
 
-    end_tests()
+    end()
     shutil.rmtree('./saver_tests')
 
 

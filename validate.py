@@ -4,7 +4,7 @@ from collections import defaultdict
 from test import *
 
 class ValidationManager(object):
-    def __init__(self, algorithm, frequency):
+    def __init__(self, algorithm, frequency=1):
         super().__init__()
         self.frequency = frequency
         self.validate = algorithm
@@ -35,6 +35,7 @@ class ValidationManager(object):
     def _validate(self, session, data, device):
         with torch.no_grad():
             model = session.model
+            model = model.to(device)
             model.eval()
             metrics = defaultdict(lambda: 0.0)
 
