@@ -4,6 +4,7 @@ import torch.nn.functional as f
 
 import math
 
+from itertools import chain
 
 class Autoencoder(nn.Module):
     """Autoencoder(enc, dec)
@@ -18,6 +19,10 @@ class Autoencoder(nn.Module):
     def __init__(self, encoder, decoder):
         super().__init__()
         self.__dict__.update(locals())
+
+    def parameters(self):
+        return chain(self.encoder.parameters(),
+                     self.decoder.parameters())
 
     def forward(self, x):
         return self.decoder(self.encoder(x))
