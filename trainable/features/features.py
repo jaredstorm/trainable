@@ -12,7 +12,7 @@ class Features(object):
 
     def __init__(self, feats, device=None):
         super().__init__()
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = device if device is not None else torch.device('cpu')
         self.feats = [f.float().to(self.device) for f in feats]
 
     def cuda(self):
