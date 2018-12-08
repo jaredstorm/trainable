@@ -143,6 +143,10 @@ class FeatureExtractor(nn.Module):
         self.feats = []
         self._register_feats(layers)
 
+    def to(self, device):
+        self.model = self.model.to(device)
+        return self
+
     def _register_feats(self, layers):
         for i, m in enumerate(self.model.modules()):
             if isinstance(m, nn.ReLU):
