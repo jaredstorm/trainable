@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as f
 
+import numpy as np
+
 import math
 
 from itertools import chain
@@ -33,6 +35,9 @@ class Autoencoder(nn.Module):
 
     def decode(self, x):
         return self.decoder(x)
+
+    def __len__(self):
+        return np.sum([np.prod(p.size()) for p in self.parameters()])
 
 
 class Encoder(nn.Module):
@@ -90,6 +95,9 @@ class Encoder(nn.Module):
         x = x.reshape(x.size(0), -1)
         return self.linear(x)
 
+    def __len__(self):
+        return np.sum([np.prod(p.size()) for p in self.parameters()])
+
 
 class Decoder(nn.Module):
     """Decoder(img=32, base=16, latent=128, kernel=3)
@@ -140,6 +148,9 @@ class Decoder(nn.Module):
         for layer in self.layers:
             x = layer(x)
         return x
+
+    def __len__(self):
+        return np.sum([np.prod(p.size()) for p in self.parameters()])
 
 
 class Upsample(nn.Module):
