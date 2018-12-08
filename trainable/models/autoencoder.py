@@ -66,7 +66,7 @@ class Encoder(nn.Module):
             self.layers.extend([
                 # Convolutional Layer
                 nn.Conv2d(base, base, kernel, padding=kernel//2),
-                nn.BatchNorm2d(base),
+                # nn.BatchNorm2d(base),
                 nn.LeakyReLU(),
 
                 # Convolutional Pooling
@@ -124,7 +124,7 @@ class Decoder(nn.Module):
             self.layers.extend([
                 Upsample(),
                 nn.Conv2d(base*2, base, kernel, padding=kernel//2),
-                nn.BatchNorm2d(base),
+                # nn.BatchNorm2d(base),
                 nn.ReLU(),
 
                 nn.Conv2d(base, base, kernel, padding=kernel//2),
