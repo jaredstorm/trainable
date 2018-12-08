@@ -2,7 +2,13 @@ import torch
 
 
 class Algorithm(object):
-    """Algorithm Base Class
+    """Algorithm(eval=False)
+
+    Algorithm Base Class
+
+    Args:
+        eval (bool): whether or not this algorithm will
+            be used for evaluation/validation
 
     Extending this class:
     To subclass an Algorithm that works fluidly with the rest
@@ -19,7 +25,6 @@ class Algorithm(object):
             - NOTE: use self.key() with each of your loss names
               so that the class will automatically handle renaming
               keys in eval mode.
-
 
     Example::
         >>> class DummyAlgorithm(Algorithm):
