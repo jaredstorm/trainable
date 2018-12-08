@@ -20,8 +20,6 @@ class Autoencoder(nn.Module):
     def __init__(self, encoder, decoder):
         super().__init__()
         self.__dict__.update(locals())
-        self.add_module('encoder', self.encoder)
-        self.add_module('decoder', self.decoder)
 
     def parameters(self):
         return chain(self.encoder.parameters(),
