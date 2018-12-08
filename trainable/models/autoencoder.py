@@ -145,5 +145,5 @@ class Decoder(nn.Module):
 class Upsample(nn.Module):
     """Wrapper class for f.interpolate (avoids deprecation warnings)."""
     def forward(self, x):
-        return f.interpolate(x, scale_factor=x, mode='nearest')
+        return f.interpolate(x, scale_factor=2, mode='nearest')
 
