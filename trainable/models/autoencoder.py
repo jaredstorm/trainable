@@ -4,6 +4,7 @@ import torch.nn.functional as f
 
 import math
 
+
 class Autoencoder(nn.Module):
     """Autoencoder(enc, dec)
 
@@ -45,7 +46,7 @@ class Encoder(nn.Module):
     def __init__(self, img=32, base=16, latent=128, kernel=3):
         super().__init__()
         self.__dict__.update(locals())
-        self._init_topology(img, base, latent)
+        self._init_topology(img, base, latent, kernel)
 
     def _init_topology(self, img, base, latent, kernel):
         """Build the network topology from init args."""
