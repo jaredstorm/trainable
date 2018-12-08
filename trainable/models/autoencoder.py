@@ -6,6 +6,7 @@ import math
 
 from itertools import chain
 
+
 class Autoencoder(nn.Module):
     """Autoencoder(enc, dec)
 
@@ -19,6 +20,8 @@ class Autoencoder(nn.Module):
     def __init__(self, encoder, decoder):
         super().__init__()
         self.__dict__.update(locals())
+        self.add_module('encoder', self.encoder)
+        self.add_module('decoder', self.decoder)
 
     def parameters(self):
         return chain(self.encoder.parameters(),
