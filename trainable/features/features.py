@@ -15,8 +15,16 @@ class Features(object):
         self.device = device if device is not None else torch.device('cpu')
         self.feats = [f.float().to(self.device) for f in feats]
 
+    def to(self, device):
+        self.feats = [f.to(device) for f in self.feats]
+        return self
+
     def cuda(self):
         self.feats = [f.cuda() for f in self.feats]
+        return self
+
+    def cpu(self):
+        self.feats = [f.cpu() for f in self.feats]
         return self
 
     def mean(self):
