@@ -38,74 +38,74 @@ class Features(object):
     def __rsub__(self, other):
         lself = len(self.feats)
         if type(other) == float:
-            return Features([other - self.feats[i] for i in range(lself)])
+            return Features([other - self.feats[i] for i in range(lself)], self.device)
         else:
             lother = len(other)
             self._test_lengths(lself, lother)
-            return Features([other[i] - self.feats[i] for i in range(lself)])
+            return Features([other[i] - self.feats[i] for i in range(lself)], self.device)
 
     def __sub__(self, other):
         lself = len(self.feats)
         if type(other) == float:
-            return Features([self.feats[i] - other for i in range(lself)])
+            return Features([self.feats[i] - other for i in range(lself)], self.device)
         else:
             lother = len(other)
             self._test_lengths(lself, lother)
-            return Features([self.feats[i] - other[i] for i in range(lself)])
+            return Features([self.feats[i] - other[i] for i in range(lself)], self.device)
 
     def __radd__(self, other):
         lself = len(self.feats)
         if type(other) == float:
-            return Features([other + self.feats[i] for i in range(lself)])
+            return Features([other + self.feats[i] for i in range(lself)], self.device)
         else:
             lother = len(other)
             self._test_lengths(lself, lother)
-            return Features([other[i] + self.feats[i] for i in range(lself)])
+            return Features([other[i] + self.feats[i] for i in range(lself)], self.device)
 
     def __add__(self, other):
         lself = len(self.feats)
         if type(other) == float:
-            return Features([self.feats[i] + other for i in range(lself)])
+            return Features([self.feats[i] + other for i in range(lself)], self.device)
         else:
             lother = len(other)
             self._test_lengths(lself, lother)
-            return Features([self.feats[i] + other[i] for i in range(lself)])
+            return Features([self.feats[i] + other[i] for i in range(lself)], self.device)
 
     def __rmul__(self, other):
         lself = len(self.feats)
         if type(other) == float:
-            return Features([other * self.feats[i] for i in range(lself)])
+            return Features([other * self.feats[i] for i in range(lself)], self.device)
         else:
             lother = len(other)
             self._test_lengths(lself, lother)
-            return Features([other[i] * self.feats[i] for i in range(lself)])
+            return Features([other[i] * self.feats[i] for i in range(lself)], self.device)
 
     def __mul__(self, other):
         lself = len(self.feats)
         if type(other) == float:
-            return Features([self.feats[i] * other for i in range(lself)])
+            return Features([self.feats[i] * other for i in range(lself)], self.device)
         else:
             lother = len(other)
             self._test_lengths(lself, lother)
-            return Features([self.feats[i] * other[i] for i in range(lself)])
+            return Features([self.feats[i] * other[i] for i in range(lself)], self.device)
 
     def __truediv__(self, other):
         lself = len(self.feats)
         if type(other) in (float, int):
-            return Features([self.feats[i] / other for i in range(lself)])
+            return Features([self.feats[i] / other for i in range(lself)], self.device)
         else:
             raise ValueError("Division by non float/int")
 
     def __floordiv__(self, other):
         lself = len(self.feats)
         if type(other) in (float, int):
-            return Features([self.feats[i] // other for i in range(lself)])
+            return Features([self.feats[i] // other for i in range(lself)], self.device)
         else:
             raise ValueError("Division by non float/int")
 
     def __pow__(self, power):
         assert type(power) in (int, float), f"Featureset -- power must be of type int or float"
-        return Features([self.feats[i] ** power for i in range(len(self.feats))])
+        return Features([self.feats[i] ** power for i in range(len(self.feats))],self.device)
 
     def __eq__(self, other):
         if self is other:
