@@ -2,7 +2,17 @@ import torch
 from skimage.transform import PiecewiseAffineTransform, warp
 import numpy as np
 
+
 class MeshWarp(object):
+    """MeshWarp(grid_size=8)
+
+    Interface for piecewise affine transforms.
+
+    Args:
+        grid_size (int): The number of vertical and horizontal
+            samples of the image. A value of 8 samples an 8x8
+            grid of points evenly across the image. Default: 8
+    """
 
     def __init__(self, grid_size=8):
         super().__init__()
@@ -33,15 +43,41 @@ class MeshWarp(object):
 
 
 class NormalMeshWarp(MeshWarp):
-    def __init__(self, intensity=4, grid_size=8):
+    """NormalMeshWarp(std=1, grid_size=8)
+
+    Args:
+        std (int): The standard deviation of the normal
+            distribution. A higher value means more
+            perturbation.
+
+        grid_size (int): The number of vertical and horizontal
+            samples of the image. A value of 8 samples an 8x8
+            grid of points evenly across the image. Default: 8
+    """
+    def __init__(self, std=1, grid_size=8):
         super().__init__(grid_size)
         self.__dict__.update(locals())
 
     def _get_random_element(self, shape):
-        return np.random.normal(0, self.intensity, shape)
+        return np.random.normal(0, self.std, shape)
 
 
 class UniformMeshWarp(MeshWarp):
+    """UniformMeshWarp(low=-1, high=1, grid_size=8)
+
+    Args:
+        low (int): The minimum random perturbation. i.e., the most
+            a grid point could be warped up and to the left
+            (in pixels). Default: -1
+
+        high (int): The maximum random perturbation. i.e., the most
+            a grid point could be warped down and to the right.
+            (in pixels). Default: 1
+
+        grid_size (int): The number of vertical and horizontal
+            samples of the image. A value of 8 samples an 8x8
+            grid of points evenly across the image. Default: 8
+    """
     def __init__(self, low=-1, high=1, grid_size=8):
         super().__init__(grid_size)
         self.__dict__.update(locals())
