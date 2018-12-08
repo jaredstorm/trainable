@@ -140,7 +140,6 @@ class FeatureExtractor(nn.Module):
     def __init__(self, model, layers=None):
         super().__init__()
         self.__dict__.update(locals())
-        self.model = self.model.cuda()
         self.feats = []
         self._register_feats(layers)
 
