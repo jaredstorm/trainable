@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 from torch import optim
+
+
 def title(title):
     s = f"# --- {title.upper()} TESTS "
     s = s + "-" * (78 - len(s)) + " #"
@@ -26,6 +28,7 @@ def end():
 def device(device):
     return torch.device(device)
 
+
 class Model(nn.Module):
     def __init__(self):
         super().__init__()
@@ -45,11 +48,5 @@ class Dataset(Dataset):
 
     def __len__(self):
         return self.set.size(0)
-
-
-class Optimizer(object):
-    def __init__(self, params, lr=1e-4):
-        super().__init__()
-        self = optim.Adam(params, lr)
 
 
