@@ -5,6 +5,24 @@ import math
 
 
 class Autoencoder(nn.Module):
+    """Autoencoder(img=128, base=16, latent=128)
+
+    An autoencoder class whose topology is determined dynamically
+    on initialization.
+
+    Attributes:
+        img (int): Image size (square). Should be a power of 2.
+            Default: 128
+
+        base (int): The number of filters on the first layer
+            of the encoder and the last layer of the decoder.
+            filter numbers double periodically as they approach
+            the middle of the autoencoder. Default: 16.
+
+        latent (int): The size of latent vector encoded by the model.
+            Default: 128.
+    """
+
     def __init__(self, img=128, base=16, latent=128):
         super().__init__()
 
@@ -22,10 +40,29 @@ class Autoencoder(nn.Module):
         return self.decoder(x)
 
     def __len__(self):
+        """Returns the number of parameters in the model."""
         return np.sum([np.prod(p.size()) for p in self.parameters()])
 
 
 class Encoder(nn.Module):
+    """Encoder(img=128, base=16, latent=128)
+
+    An encoder class whose topology is determined dynamically
+    on initialization.
+
+    Attributes:
+        img (int): Image size (square). Should be a power of 2.
+            Default: 128
+
+        base (int): The number of filters on the first layer
+            of the encoder and the last layer of the decoder.
+            filter numbers double periodically as they approach
+            the middle of the autoencoder. Default: 16.
+
+        latent (int): The size of latent vector encoded by the model.
+            Default: 128.
+    """
+
     def __init__(self, img=128, base=16, latent=128):
         super().__init__()
 
@@ -75,6 +112,23 @@ class Upsample(nn.Module):
 
 
 class Decoder(nn.Module):
+    """Decoder(img=128, base=16, latent=128)
+
+    An decoder class whose topology is determined dynamically
+    on initialization.
+
+    Attributes:
+        img (int): Image size (square). Should be a power of 2.
+            Default: 128
+
+        base (int): The number of filters on the first layer
+            of the encoder and the last layer of the decoder.
+            filter numbers double periodically as they approach
+            the middle of the autoencoder. Default: 16.
+
+        latent (int): The size of latent vector encoded by the model.
+            Default: 128.
+    """
 
     def __init__(self, img=128, base=16, latent=128):
         super().__init__()
