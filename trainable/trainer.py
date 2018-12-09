@@ -82,7 +82,7 @@ class Trainer(object):
         trainer = Trainer(
           visualizer=YourVisualizer(),  # Typically Plotter() or Saver()
           train_alg=YourTrainingAlgorithm(),
-          test_alg=YourTrainingAlgorithm(validate=True)
+          test_alg=YourTrainingAlgorithm(eval=True)
           display_freq=...,
           visualize_freq=...,
           autosave_freq=...,
