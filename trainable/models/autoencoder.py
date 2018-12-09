@@ -1,31 +1,16 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as f
-
 import numpy as np
-
 import math
-
-from itertools import chain
 
 
 class Autoencoder(nn.Module):
-    """Autoencoder(enc, dec)
-
-    Encoder/Decoder composite class.
-
-    Args:
-        encoder (torch.nn.Module): An encoder module.
-        decoder (torch.nn.Module): A decoder module.
-    """
-
-    def __init__(self, encoder, decoder):
+    def __init__(self, img=128, base=16, latent=128):
         super().__init__()
-        self.__dict__.update(locals())
 
-    def parameters(self):
-        return chain(self.encoder.parameters(),
-                     self.decoder.parameters())
+        self.encoder = Encoder(img, base, latent)
+        self.decoder = Decoder(img, base, latent)
+        self.latent = self.encoder.latent
 
     def forward(self, x):
         return self.decoder(self.encoder(x))
@@ -41,112 +26,37 @@ class Autoencoder(nn.Module):
 
 
 class Encoder(nn.Module):
-    """Encoder(img=32, base=16, latent=128, kernel=3)
-
-    Args:
-        img (int): The square image size. Default: 32.
-        base (int): The number of filters in the first
-            convolutional layer. Each layer thereafter
-            doubles the number of filters. Default: 16
-        latent (int): The length of the output latent
-            encoding. Default: 128
-        kernel (int): The square size of each convolution
-            kernel. Default: 3
-    """
-
-    def __init__(self, img=32, base=16, latent=128, kernel=3):
+    def __init__(self, img=128, base=16, latent=128):
         super().__init__()
-        self.__dict__.update(locals())
-        self._init_topology(img, base, latent, kernel)
 
-    def _init_topology(self, img, base, latent, kernel):
-        """Build the network topology from init args."""
+        nblocks = math.log2(img)
+        assert nblocks - int(nblocks) == 0, "img must be a power of 2"
+        nblocks = int(nblocks)
 
-        self.layers = nn.ModuleList()
-        self.layers.append(nn.Conv2d(3, base, 9, padding=9//2))
-
-        # Append Convolutional Layers/Pooling until spatial
-        # dimension reaches 1x1.
-        while img > 1:
+        self.layers = nn.ModuleList([nn.Conv2d(3, base, kernel_size=9, stride=1, padding=4)])
+        double = False
+        for _ in range(nblocks):
+            out_channels = base * 2 if double else base
             self.layers.extend([
-                # Convolutional Layer
-                nn.Conv2d(base, base, kernel, padding=kernel//2),
-                # nn.BatchNorm2d(base),
-                nn.LeakyReLU(),
-
-                # Convolutional Pooling
-                nn.Conv2d(base, base*2, kernel_size=2, stride=2),
-                nn.BatchNorm2d(base*2),
+                nn.Conv2d(base, out_channels, kernel_size=3, stride=2, dilation=2, padding=2),
+                nn.BatchNorm2d(out_channels),
                 nn.LeakyReLU()
             ])
+            base = base * 2 if double else base
+            double = not double
 
-            # Number of filters doubles with each pooling operation.
-            base *= 2
-            img //= 2
+        self.layers.append(nn.Conv2d(base, latent, kernel_size=1))
 
-        # Linear layer transforms features to latent vector.
-        self.linear = nn.Linear(base, latent)
+        for layer in self.layers:
+            if layer.__class__.__name__ == 'Conv2d':
+                nn.init.kaiming_normal_(layer.weight)
+
+        self.latent = latent
 
     def forward(self, x):
-        """Encode an image into latent space."""
         for layer in self.layers:
             x = layer(x)
 
-        x = x.reshape(x.size(0), -1)
-        return self.linear(x)
-
-    def __len__(self):
-        return np.sum([np.prod(p.size()) for p in self.parameters()])
-
-
-class Decoder(nn.Module):
-    """Decoder(img=32, base=16, latent=128, kernel=3)
-
-    Args:
-        img (int): The square image size. Default: 32.
-        base (int): The number of filters in the first
-            convolutional layer. Each layer thereafter
-            doubles the number of filters. Default: 16
-        latent (int): The length of the output latent
-            encoding. Default: 128
-        kernel (int): The square size of each convolution
-            kernel. Default: 3
-    """
-
-    def __init__(self, img=32, base=16, latent=128, kernel=3):
-        super().__init__()
-        self.__dict__.update(locals())
-        self._init_topology(img, base, latent, kernel)
-
-    def _init_topology(self, img, base, latent, kernel):
-        """Build the network topology from init args."""
-
-        base = base * 2**int(math.log2(img))
-        self.linear = nn.Linear(latent, base)
-
-        cur = 1
-        self.layers = nn.ModuleList()
-        while cur < img:
-            base //= 2
-            cur *= 2
-            self.layers.extend([
-                Upsample(),
-                nn.Conv2d(base*2, base, kernel, padding=kernel//2),
-                # nn.BatchNorm2d(base),
-                nn.ReLU(),
-
-                nn.Conv2d(base, base, kernel, padding=kernel//2),
-                nn.BatchNorm2d(base),
-                nn.ReLU()
-            ])
-
-        self.layers.append(nn.Conv2d(base, 3, 9, padding=9//2))
-
-    def forward(self, x):
-        """Decode an image from latent space."""
-        x = self.linear(x).reshape(x.size(0), -1, 1, 1)
-        for layer in self.layers:
-            x = layer(x)
         return x
 
     def __len__(self):
@@ -154,7 +64,57 @@ class Decoder(nn.Module):
 
 
 class Upsample(nn.Module):
-    """Wrapper class for f.interpolate (avoids deprecation warnings)."""
-    def forward(self, x):
-        return f.interpolate(x, scale_factor=2, mode='nearest')
+    """Wrapper class for torch.nn.functional.interpolate."""
 
+    def __init__(self, scale_factor=2, mode='nearest'):
+        super(Upsample, self).__init__()
+        self.__dict__.update(locals())
+
+    def forward(self, x):
+        return f.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
+
+
+class Decoder(nn.Module):
+
+    def __init__(self, img=128, base=16, latent=128):
+        super().__init__()
+
+        nblocks = math.log2(img)
+        assert nblocks - int(nblocks) == 0, "img must be powers of 2"
+        nblocks = int(nblocks)
+
+        base = base * 2 ** (nblocks // 2)
+        self.latent = latent
+
+        self.layers = nn.ModuleList()
+        self.layers.append(nn.Conv2d(latent, base, kernel_size=1))
+
+        # The modulo test ensures that the decoder mirrors the encoder
+        halve = True if nblocks % 2 == 0 else False
+
+        for _ in range(nblocks):
+            out_channels = base // 2 if halve else base
+            self.layers.extend([
+                Upsample(),
+                nn.Conv2d(base, out_channels, kernel_size=3, stride=1, dilation=2, padding=2),
+                nn.BatchNorm2d(out_channels),
+                nn.LeakyReLU(),
+                # Upsample()
+            ])
+            base = base // 2 if halve else base
+            halve = not halve
+
+        self.image = nn.Conv2d(base, 3, kernel_size=9, stride=1, padding=4)
+
+        for layer in self.layers:
+            if layer.__class__.__name__ == 'Conv2d':
+                nn.init.kaiming_normal_(layer.weight)
+
+    def forward(self, z):
+        for layer in self.layers:
+            z = layer(z)
+
+        return self.image(z)
+
+    def __len__(self):
+        return np.sum([np.prod(p.size()) for p in self.parameters()])
