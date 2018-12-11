@@ -3,6 +3,7 @@ import os
 from collections import defaultdict
 
 import shutil
+import trainable.test as test
 from trainable.test import *
 
 
@@ -15,8 +16,9 @@ class Session(object):
       metrics (dict): A set of metrics that were measured over training and/or
         evaluation
       epoch (int): The most recently completed epoch of training
-      model (torch.nn.Module): A torch machine learning model.
-      optim (torch.optim.Optimizer): Some optimizer for your model
+      model (torch.nn.Module): A torch machine learning model, or list of models.
+      optim (torch.optim.Optimizer): Some optimizer or list of optimizers for
+        your model(s).
     """
 
     def __init__(self, model=None, optim=None):
@@ -88,14 +90,25 @@ class Session(object):
         if not os.path.exists(os.path.dirname(path)):
             raise ValueError(f"Path {path} does not exist. Did you mistype any subfolders?")
 
+        # model_state = None
+        if type(self.model) in (list, tuple):
+            model_state = [m.state_dict() for m in self.model]
+        else:
+            model_state = self.model.state_dict()
+
+        # optim_state = None
+        if type(self.optim) in (list, tuple):
+            optim_state = [o.state_dict() for o in self.optim]
+        else:
+            optim_state = self.optim.state_dict()
+
         session = {
             'name': self.name,
             'description': self.description,
             'metrics': dict(self.metrics),
             'epoch': self.epoch,
-
-            'model_state': self.model.state_dict(),
-            'optim_state': self.optim.state_dict(),
+            'model_state': model_state,
+            'optim_state': optim_state,
         }
 
         torch.save(session, path)
@@ -108,8 +121,20 @@ class Session(object):
 
         session = torch.load(path)
 
-        self.model.load_state_dict(session['model_state'])
-        self.optim.load_state_dict(session['optim_state'])
+        model_state = session['model_state']
+
+        if type(self.model) in (list, tuple):
+            for m, s in zip(self.model, model_state):
+                m.load_state_dict(s)
+        else:
+            self.model.load_state_dict(model_state)
+
+        optim_state = session['optim_state']
+        if type(self.optim) in (list, tuple):
+            for o, s in zip(self.optim, optim_state):
+                o.load_state_dict(s)
+        else:
+            self.optim.load_state_dict(optim_state)
 
         self.name = session['name']
         self.description = session['description']
@@ -236,7 +261,36 @@ def session_test():
     passed = passed if session2.resumed == False else False
     evaluate(passed)
 
+    subtest(4, "Multiple Models")
+
+    model1 = (test.Model(), test.Model())
+    optim1 = (test.optim(model1[0].parameters()), test.optim(model1[1].parameters()))
+    session = Session(model1, optim1)
+
+    if os.path.exists('./test_folder'):
+        shutil.rmtree('./test_folder')
+        os.makedirs('./test_folder')
+
+    session.save('./test_folder/session.sesh')
+
+
+    model2 = (test.Model(), test.Model())
+    optim2 = (test.optim(model2[0].parameters()), test.optim(model2[1].parameters()))
+    session = Session(model2, optim2)
+    session.load('./test_folder/session.sesh')
+
+    passed = True
+
+    for k1, k2 in zip(session.model[0].state_dict().values(), model1[0].state_dict().values()):
+        passed = passed if torch.equal(k1, k2) else False
+
+    evaluate(passed)
+
     end()
+
+    if os.path.exists('./test_folder'):
+        shutil.rmtree('./test_folder')
+        os.makedirs('./test_folder')
 
 
 def autosession_test():
@@ -251,7 +305,7 @@ def autosession_test():
     passed = True
 
     session.resume()
-    passed = passed if session.epoch == 1 else False
+    passed = passed if session.epoch == 0 else False
     passed = passed if session.resumed else False
 
     session.suspend()
@@ -301,9 +355,21 @@ def autosession_test():
     passed = passed if session2.metrics['Validation'][-1] == 2 else False
     evaluate(passed)
 
+    subtest(6, "Multiple Models")
+    if os.path.exists('./test_folder'):
+        shutil.rmtree('./test_folder')
+        os.makedirs('./test_folder')
+
+    model_a = (test.Model(), test.Model)
+    optim_a = (test.optim(model_a[0].parameters()), test.optim(model_a[1].parameters()))
+    session = AutoSession(model_a, optim_a)
+
+    session.save('test_folder/session.sesh')
+
+
+
     end()
     shutil.rmtree('./test_folder')
-
 
 if __name__ == '__main__':
     session_test()
