@@ -187,6 +187,11 @@ class Trainer(object):
         """Give your session a name."""
         self.session.rename(name)
 
+    def duplicate_session(self, new_path):
+        freq = self.session.get_frequency()
+        self.session = AutoSession(self.session.model, self.session.optim, new_path)
+        self.session.set_frequency(freq)
+
     def describe_session(self, description):
         """Give your session a more in depth description."""
         self.session.describe(description)
