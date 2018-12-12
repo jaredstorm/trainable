@@ -3,7 +3,7 @@ from collections import defaultdict
 from statistics import mean
 
 
-class TrainingEpoch(object):
+class Epoch(object):
     """Training epoch base class.
 
     Usually an epoch just consists of running data
@@ -13,7 +13,7 @@ class TrainingEpoch(object):
     Subclassing:
 
     Example::
-        >>> class DefaultTrainingEpoch(TrainingEpoch):
+        >>> class DefaultEpoch(Epoch):
         >>>     def __call__(self, session, data, device):
         >>>         model, optim = session.model, session.optim
         >>>         for batch in data:
@@ -125,7 +125,7 @@ class TrainingEpoch(object):
         self.metrics = defaultdict(lambda: [])
 
 
-class DefaultTrainingEpoch(TrainingEpoch):
+class DefaultEpoch(Epoch):
     """DefaultTrainingEpoch()
     The default behavior for an epoch of training.
     """

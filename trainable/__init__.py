@@ -1,5 +1,5 @@
 from .algorithm import Algorithm
-from .epoch import TrainingEpoch, DefaultTrainingEpoch
+from .epoch import Epoch, DefaultEpoch
 from .progress import ProgressManager
 from .session import Session, AutoSession
 from .trainer import Trainer
