@@ -158,8 +158,11 @@ class AutoSession(Session):
 
     def set_frequency(self, frequency):
         """Set how often to actually save your session"""
-        self.save_frequency = frequency
+        self.frequency = frequency
         self.counter = self.epoch % frequency
+
+    def get_frequency(self):
+        return self.frequency
 
     def set_save_path(self, path):
         self.save_path = path
@@ -183,7 +186,7 @@ class AutoSession(Session):
             raise AttributeError("Either specify a path through this method or set one via set_save_path(path)")
 
         self.counter += 1
-        if self.counter == self.save_frequency:
+        if self.counter == self.frequency:
             self.counter = 0
             path = path if path is not None else self.save_path
             self._save(path)
@@ -193,20 +196,30 @@ class AutoSession(Session):
 
     def _save(self, path):
         if not os.path.exists(os.path.dirname(path)):
-            os.makedirs(os.path.dirname(path))
+            raise ValueError(f"Path {path} does not exist. Did you mistype any subfolders?")
+
+        # model_state = None
+        if type(self.model) in (list, tuple):
+            model_state = [m.state_dict() for m in self.model]
+        else:
+            model_state = self.model.state_dict()
+
+        # optim_state = None
+        if type(self.optim) in (list, tuple):
+            optim_state = [o.state_dict() for o in self.optim]
+        else:
+            optim_state = self.optim.state_dict()
 
         session = {
             'name': self.name,
             'description': self.description,
             'metrics': dict(self.metrics),
             'epoch': self.epoch,
-
-            'model_state': self.model.state_dict(),
-            'optim_state': self.optim.state_dict(),
+            'model_state': model_state,
+            'optim_state': optim_state,
         }
 
         torch.save(session, path)
-
 
 def session_test():
     title('session')
