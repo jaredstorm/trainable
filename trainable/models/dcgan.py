@@ -1,6 +1,6 @@
 import torch.nn as nn
 import math
-
+import numpy as np
 
 class DCGenerator(nn.Module):
     def __init__(self, img=64, base=16, latent=128):
@@ -46,6 +46,10 @@ class DCGenerator(nn.Module):
         for layer in self.layers:
             x = layer(x)
         return x
+
+    def __len__(self):
+        return np.sum([np.prod(p.size()) for p in self.parameters()])[0]
+
 
 
 class DCCritic(nn.Module):
@@ -93,3 +97,6 @@ class DCCritic(nn.Module):
         for layer in self.layers:
             x = layer(x)
         return x
+
+    def __len__(self):
+        return np.sum([np.prod(p.size()) for p in self.parameters()])[0]
