@@ -48,6 +48,8 @@ class DCGenerator(nn.Module):
 
         for layer in self.layers:
             x = layer(x)
+
+        print(x.size())
         return x
 
     def __len__(self):
@@ -98,6 +100,7 @@ class DCCritic(nn.Module):
 
     def forward(self, x):
         for layer in self.layers:
+            print(x.size())
             x = layer(x)
         return x
 
