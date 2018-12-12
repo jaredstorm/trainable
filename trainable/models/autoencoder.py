@@ -171,4 +171,4 @@ class Decoder(nn.Module):
         return self.image(z)
 
     def __len__(self):
-        return np.sum([np.prod(p.size()) for p in self.parameters()])[0]
+        return np.sum([np.prod(p.size()) for p in self.parameters()])

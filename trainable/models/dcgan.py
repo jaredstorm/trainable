@@ -48,7 +48,7 @@ class DCGenerator(nn.Module):
         return x
 
     def __len__(self):
-        return np.sum([np.prod(p.size()) for p in self.parameters()])[0]
+        return np.sum([np.prod(p.size()) for p in self.parameters()])
 
 
 
@@ -99,4 +99,4 @@ class DCCritic(nn.Module):
         return x
 
     def __len__(self):
-        return np.sum([np.prod(p.size()) for p in self.parameters()])[0]
+        return np.sum([np.prod(p.size()) for p in self.parameters()])
