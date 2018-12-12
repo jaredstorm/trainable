@@ -53,6 +53,12 @@ class Algorithm(object):
     def key(self, key):
         return ('Validation ' if self.eval else '') + key
 
+    def validate(self):
+        self.eval = True
+
+    def train(self):
+        self.eval = False
+
 
 class DummyAlgorithm(Algorithm):
     """Dummy training algorithm for testing purposes."""

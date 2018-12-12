@@ -99,19 +99,24 @@ class Trainer(object):
     def __init__(self, **args):
         super().__init__()
         self.loop = ProgressManager()
-        self.epoch = args.pop('training_epoch', DefaultTrainingEpoch())
+
+        # Set up Epoch Runner
+        self.epoch = args.pop('epoch', DefaultTrainingEpoch())
         self.epoch.set_visualizer(args.pop('visualizer', Plotter()))
-
         self.epoch.loop = self.loop
-        self.epoch.train = args.pop('train_alg', DummyAlgorithm())
-        self.validation = ValidationManager(args.pop('test_alg', DummyAlgorithm(eval=True)))
+        self.epoch.set_algorithm(args.pop('algorithm', DummyAlgorithm()))
 
+        # Set up Validation Management
+        self.validation = ValidationManager(self.epoch)
+
+        # Set Tweakable Parameters
         self.set_display_frequency(args.pop('display_freq', 1))
         self.set_visualize_frequency(args.pop('visualize_freq', 1))
         self.set_validation_frequency(args.pop('validate_freq', 1))
-
         self.autosave_freq = args.pop('autosave_freq', 1)
         self.device = args.pop('device', torch.device('cpu'))
+
+        # Initialize session.
         self.session = None
 
     ##############################################################################
@@ -193,28 +198,22 @@ class Trainer(object):
     # Configurable Elements                                                      #
     ##############################################################################
 
-    def set_train_algorithm(self, algorithm):
-        """Inject a different algorithm for batch training."""
-        self.epoch.train = algorithm
+    def set_epoch(self, epoch):
+        """Inject a different epoch running strategy."""
+        self.epoch = epoch
+        self.validation.set_epoch(epoch)
 
-    def set_epoch(self, epoch_manager):
-        """Inject a different epoch runner."""
-        algorithm = self.epoch.get_algorithm()
-
-        self.epoch = epoch_manager
+    def set_algorithm(self, algorithm):
+        """Inject a different training algorithm."""
         self.epoch.set_algorithm(algorithm)
 
-        self.epoch.loop = self.loop
-
-    def set_val_algorithm(self, algorithm):
-        """Inject a different algorithm for validation of each batch."""
-        self.validation.validate = algorithm
-
-    def set_validation(self, validation_manager):
-        """Inject a different validation runner."""
-        algorithm = self.validation.get_algorithm()
-        self.validation = validation_manager
-        self.validation.set_algorithm(algorithm)
+        # Not totally sure if the rest is necessary,
+        # since the epoch object being held by the validation
+        # manager is probably the same one as being held by the
+        # Trainer.
+        epoch = self.validation.get_epoch()
+        epoch.set_algorithm(algorithm)
+        self.validation.set_epoch(epoch)
 
     def set_visualizer(self, visualizer):
         """Inject a different visualization strategy."""
@@ -233,7 +232,7 @@ class Trainer(object):
 
     def set_visualize_frequency(self, frequency):
         """Set how often to sample visuals, in batches."""
-        self.epoch.visualize.frequency = frequency
+        self.epoch.visualizer.frequency = frequency
 
     def set_autosave_frequency(self, frequency):
         """Set how often the session saves in epochs."""
