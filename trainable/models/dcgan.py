@@ -43,6 +43,9 @@ class DCGenerator(nn.Module):
                 nn.init.kaiming_normal_(layer.weight)
 
     def forward(self, x):
+        if len(x.size()) == 2:
+            x = x.unsqueeze(-1).unsqueeze(-1)
+
         for layer in self.layers:
             x = layer(x)
         return x
