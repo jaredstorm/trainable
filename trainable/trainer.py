@@ -2,7 +2,7 @@ from trainable.progress import ProgressManager
 from trainable.validate import ValidationManager
 from trainable.visualize import Plotter, Saver
 from trainable.epoch import DefaultEpoch
-from trainable.algorithm import DummyAlgorithm
+from trainable.algorithm import Mean
 from trainable.session import AutoSession
 
 import torch
@@ -104,7 +104,7 @@ class Trainer(object):
         self.epoch = args.pop('epoch', DefaultEpoch())
         self.epoch.set_visualizer(args.pop('visualizer', Plotter()))
         self.epoch.loop = self.loop
-        self.epoch.set_algorithm(args.pop('algorithm', DummyAlgorithm()))
+        self.epoch.set_algorithm(args.pop('algorithm',Mean()))
 
         # Set up Validation Management
         self.validation = ValidationManager(self.epoch)
@@ -262,8 +262,8 @@ def trainer_test():
 
     # set up training session
     trainer = Trainer(
-        train_alg=DummyAlgorithm(),
-        test_alg=DummyAlgorithm(eval=True),
+        train_alg=Mean(),
+        test_alg=Mean(eval=True),
         visualizer=Saver('./trainer_test/samples'),
         display_freq=100,
         visualize_freq=100,
@@ -295,8 +295,8 @@ def trainer_test():
     model = test.Model().to(device)
     optim = Adam(model.parameters(), 1e-4)
     trainer = Trainer(
-        train_alg=DummyAlgorithm(),
-        test_alg=DummyAlgorithm(eval=True),
+        train_alg=Mean(),
+        test_alg=Mean(eval=True),
         visualizer=Saver('./trainer_test/samples'),
         display_freq=100,
         visualize_freq=100,

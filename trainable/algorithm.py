@@ -275,6 +275,16 @@ class MSE(Algorithm):
 ########################################################################################################################
 #   TESTING RESOURCES                                                                                                  #
 ########################################################################################################################
+class Mean(Algorithm):
+    """Dummy training algorithm for testing purposes."""
+
+    def __init__(self, eval=False):
+        super().__init__()
+        self.__dict__.update(locals())
+
+    def run(self, model, batch, device):
+        batch = batch.to(device)
+        return {"Mean": torch.mean(model(batch))}
 
 
 class TestAlgorithmA(Algorithm):
