@@ -1,7 +1,8 @@
 import torch.nn as nn
-import torch.nn.functional as f
 import numpy as np
 import math
+
+from trainable.layers import Upsample
 
 
 class Autoencoder(nn.Module):
@@ -21,6 +22,34 @@ class Autoencoder(nn.Module):
 
         latent (int): The size of latent vector encoded by the model.
             Default: 128.
+
+
+    Basic Shape: # <-- "Spatial Dimension"
+
+
+
+    ################    <---- 3
+            |
+    ################    <---- base
+    ################
+        ########        <---- base*2
+        ########
+          ####          <---- base*4
+          ####
+           ##           <---- base*8
+           ##
+           #            <---- base*16
+
+           #
+           ##
+           ##
+          ####
+          ####
+        ########
+        ########
+    ################
+    ################
+
     """
 
     def __init__(self, img=128, base=16, latent=128):
@@ -100,17 +129,6 @@ class Encoder(nn.Module):
         return np.sum([np.prod(p.size()) for p in self.parameters()])
 
 
-class Upsample(nn.Module):
-    """Wrapper class for torch.nn.functional.interpolate."""
-
-    def __init__(self, scale_factor=2, mode='nearest'):
-        super(Upsample, self).__init__()
-        self.__dict__.update(locals())
-
-    def forward(self, x):
-        return f.interpolate(x, scale_factor=self.scale_factor, mode=self.mode)
-
-
 class Decoder(nn.Module):
     """Decoder(img=128, base=16, latent=128)
 
@@ -153,7 +171,6 @@ class Decoder(nn.Module):
                 nn.Conv2d(base, out_channels, kernel_size=3, stride=1, dilation=2, padding=2),
                 nn.BatchNorm2d(out_channels),
                 nn.LeakyReLU(),
-                # Upsample()
             ])
             base = base // 2 if halve else base
             halve = not halve
