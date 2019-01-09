@@ -84,6 +84,9 @@ class Epoch(object):
     def get_visualizer(self):
         return self.visualizer
 
+    def set_visualize_frequency(self, frequency):
+        self.visualizer.set_frequency(frequency)
+
     ####################################################################################################################
     # Training/Validation Toggles                                                                                      #
     ####################################################################################################################
@@ -125,7 +128,7 @@ class Epoch(object):
         return metrics
 
     def clear_metrics(self):
-        self._metrics = defaultdict(lambda: [])
+        self.metrics = defaultdict(lambda: [])
 
 
 class DefaultEpoch(Epoch):
@@ -145,7 +148,7 @@ class DefaultEpoch(Epoch):
             if self.evaluate:
                 self.append_metrics(metrics)
             else:
-                self.visualizer(session.model,batch,device)
+                self.visualizer.visualize(session.model, batch, device)
                 self.loop.update(session.epoch, metrics)
 
         if self.evaluate:
