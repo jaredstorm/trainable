@@ -2,7 +2,7 @@ import torch
 
 import torch.nn as nn
 from torch.utils.data import Dataset
-from torch import optim
+from torch.optim import Adam
 
 
 def title(title):
@@ -28,6 +28,9 @@ def end():
 def device(device):
     return torch.device(device)
 
+
+def optim(params, lr=1e-4):
+    return Adam(params, lr)
 
 class Model(nn.Module):
     def __init__(self):
