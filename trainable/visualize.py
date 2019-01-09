@@ -25,21 +25,21 @@ class Visualizer(object):
     # Functional API                                                             #
     ##############################################################################
 
-    def __call__(self, model, batch, device):
+    def __call__(self, *args, **kwargs):
         self.counter += 1
         if self.counter == self.frequency:
             self.counter = 0
             if self.batch:
-                return self.visualize_batch(model, batch, device)
+                return self.visualize_batch(*args, **kwargs)
             else:
-                return self.visualize_single(model, batch, device)
+                return self.visualize_single(*args, **kwargs)
         else:
             return False
 
-    def visualize_batch(self, model, batch, device):
+    def visualize_batch(self, *args, **kwargs):
         raise NotImplementedError
 
-    def visualize_single(self, model, batch, device):
+    def visualize_single(self, *args, **kwargs):
         raise NotImplementedError
 
 
