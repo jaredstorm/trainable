@@ -6,6 +6,10 @@ import shutil
 
 from trainable.test import *
 
+########################################################################################################################
+# Things to do                                                                                                         #
+########################################################################################################################
+# TODO: Flesh out class and method descriptions
 
 class Visualizer(object):
     def __init__(self, frequency=1, batch=True, padding=0):
@@ -22,8 +26,11 @@ class Visualizer(object):
         self.counter = 0
 
     ##############################################################################
-    # Functional API                                                             #
+    # Interface Methods                                                          #
     ##############################################################################
+    def visualize(self, *args, **kwargs):
+        """Wrapper for functional behavior."""
+        self(*args, **kwargs)
 
     def __call__(self, *args, **kwargs):
         self.counter += 1
@@ -37,9 +44,11 @@ class Visualizer(object):
             return False
 
     def visualize_batch(self, *args, **kwargs):
+        """Implement to visualize outputs from a batch of inputs"""
         raise NotImplementedError
 
     def visualize_single(self, *args, **kwargs):
+        """Implememnt to visualize a single output from a batch of outputs"""
         raise NotImplementedError
 
 
