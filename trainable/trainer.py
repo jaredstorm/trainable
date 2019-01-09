@@ -10,7 +10,6 @@ from torch.utils.data import DataLoader
 from torch.optim import Adam
 
 import os
-from trainable import test
 import shutil
 
 

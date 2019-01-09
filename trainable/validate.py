@@ -1,6 +1,3 @@
-from trainable.test import *
-
-
 class ValidationManager(object):
     def __init__(self, epoch, frequency=1):
         super().__init__()

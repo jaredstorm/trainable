@@ -1,4 +1,3 @@
-from trainable import test
 from collections import defaultdict
 from statistics import mean
 

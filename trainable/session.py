@@ -3,8 +3,6 @@ import os
 from collections import defaultdict
 
 import shutil
-import trainable.test as test
-from trainable.test import *
 
 
 class Session(object):

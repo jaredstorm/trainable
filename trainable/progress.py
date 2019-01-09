@@ -1,6 +1,5 @@
 from tqdm import tqdm
 from collections import defaultdict
-from trainable.test import *
 
 import random
 
