@@ -128,7 +128,7 @@ class Epoch(object):
         self._metrics = defaultdict(lambda: [])
 
 
-class DefaultTrainingEpoch(Epoch):
+class DefaultEpoch(Epoch):
     """DefaultTrainingEpoch()
     The default behavior for an epoch of training.
     """
