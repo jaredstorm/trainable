@@ -48,7 +48,7 @@ class Trainer(object):
 
     2. Configurable Elements:
       Visualization:
-      - self.visualize may be any inheritor of the Visualizer class
+      - self.visualizer may be any inheritor of the Visualizer class
 
       Epoch:
       - Though the default epoch runner will work for most cases, self.epoch may
