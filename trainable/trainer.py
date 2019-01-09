@@ -1,7 +1,7 @@
 from trainable.progress import ProgressManager
 from trainable.validate import ValidationManager
 from trainable.visualize import Plotter, Saver
-from trainable.epoch import DefaultEpoch
+from trainable.epoch import DefaultTrainingEpoch
 from trainable.algorithm import Mean
 from trainable.session import AutoSession
 
@@ -101,7 +101,7 @@ class Trainer(object):
         self.loop = ProgressManager()
 
         # Set up Epoch Runner
-        self.epoch = args.pop('epoch', DefaultEpoch())
+        self.epoch = args.pop('epoch',DefaultTrainingEpoch())
         self.epoch.set_visualizer(args.pop('visualizer', Plotter()))
         self.epoch.loop = self.loop
         self.epoch.set_algorithm(args.pop('algorithm',Mean()))

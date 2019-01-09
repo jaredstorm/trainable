@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='trainable',
-    version='0.1.4.dev12',
+    version='0.1.4.dev15',
     description='The flexible training toolbox',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -19,7 +19,9 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.6'
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7'
     ],
     keywords='deep-learning dnn training torch',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),

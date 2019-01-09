@@ -13,7 +13,7 @@ class Epoch(object):
     Subclassing:
 
     Example::
-        >>> class DefaultEpoch(Epoch):
+        >>> class DefaultTrainingEpoch(Epoch):
         >>>     def __call__(self, session, data, device):
         >>>         model, optim = session.model, session.optim
         >>>         for batch in data:
@@ -128,7 +128,7 @@ class Epoch(object):
         self._metrics = defaultdict(lambda: [])
 
 
-class DefaultEpoch(Epoch):
+class DefaultTrainingEpoch(Epoch):
     """DefaultTrainingEpoch()
     The default behavior for an epoch of training.
     """
