@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='trainable',
-    version='0.1.4.dev18',
+    version='0.1.4.dev19',
     description='The flexible training toolbox',
     long_description=long_description,
     long_description_content_type='text/markdown',
@@ -25,5 +25,7 @@ setup(
     ],
     keywords='deep-learning dnn training torch',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    install_requires=['torch', 'torchvision', 'tqdm', 'matplotlib', 'numpy']
+    install_requires=['torch', 'torchvision', 'tqdm', 'matplotlib', 'numpy'],
+    test_suite='nose.collector',
+    tests_require=['nose']
 )

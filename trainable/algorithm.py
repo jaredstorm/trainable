@@ -174,7 +174,7 @@ class Algorithm(object):
 
     def _backward(self, metrics):
         """Run backpropegation on the calculated losses."""
-        loss = torch.tensor([0])
+        loss = torch.tensor([0.0])
         for key in metrics:
             loss += metrics[key]
         loss.backward()
@@ -285,121 +285,6 @@ class Mean(Algorithm):
     def run(self, model, batch, device):
         batch = batch.to(device)
         return {"Mean": torch.mean(model(batch))}
-
-
-class TestAlgorithmA(Algorithm):
-    def run(self):
-        return {
-            "Metric 1": torch.Tensor(random.uniform(0, 1)),
-            "Metric 2": torch.Tensor(random.uniform(0, 1)),
-            "Metric 3": torch.Tensor(random.uniform(0, 1))
-        }
-
-
-class TestAlgorithmB(Algorithm):
-    def run(self):
-        return {
-            "Metric 4": torch.Tensor(random.uniform(0, 1)),
-            "Metric 5": torch.Tensor(random.uniform(0, 1))
-        }
-
-
-class TestAlgorithmC(Algorithm):
-    def run(self):
-        return {"Metric 6": torch.Tensor(random.uniform(0, 1))}
-
-
-class TestAlgorithmD(Algorithm):
-    def run(self):
-        return {"Metric 7": torch.Tensor(random.uniform(0, 1))}
-
-
-def prehook(lst):
-    def hook():
-        lst.append('Pre Call Hook')
-
-    return hook
-
-
-def posthook(lst):
-    def hook():
-        lst.append('Post Call Hook')
-
-    return hook
-
-
-if __name__ == '__main__':
-    print("Test 1: ", end='')
-    alg = TestAlgorithmA()
-    alg.eval()
-    metrics = alg()
-
-    assert len(metrics) == 3, f"Failed -- len(metrics) was {len(metrics)} when it should have been 3."
-
-    for key in metrics:
-        assert type(metrics[key]) is float, f"Failed -- type(metrics['{key}']) was {type(metrics[key])} when it should have been float"
-        assert 0 <= metrics[key] and metrics[key] <= 1, f"Failed -- metrics['{key}'] was not a uniform random number"
-
-    print("Passed")
-
-    # Testing basic composition
-    print("Test 2: ",end="")
-    alg = AlgorithmList(TestAlgorithmA(),TestAlgorithmB())
-    alg.eval()
-    metrics = alg()
-
-    assert type(metrics) is dict,f"Failed -- type(metrics) was {type(metrics)} when it should have been dict"
-    assert len(metrics) == 5,f"Failed -- len(metrics) was {len(metrics)} when it should have been 5."
-    for key in metrics:
-        assert type(metrics[
-                        key]) is float,f"Failed -- type(metrics['{key}']) was {type(metrics[key])} when it should have been float"
-        assert 0 <= metrics[key] and metrics[key] <= 1,f"Failed -- metrics['{key}'] was not a uniform random number"
-
-    print("Passed")
-
-    # Testing multilayered composition
-    print("Test 3: ",end='')
-    alg1 = AlgorithmList(TestAlgorithmA(), TestAlgorithmB())
-    alg2 = AlgorithmList(TestAlgorithmC(), TestAlgorithmD())
-    alg = AlgorithmList(alg1, alg2)
-
-    alg.eval()
-    metrics = alg()
-
-    assert type(metrics) is dict, f"Failed -- type(metrics) was {type(metrics)} when it should have been dict"
-    assert len(metrics) == 7, f"Failed -- len(metrics) was {len(metrics)} when it should have been 5."
-    for key in metrics:
-        assert type(metrics[
-                        key]) is float, f"Failed -- type(metrics['{key}']) was {type(metrics[key])} when it should have been float"
-        assert 0 <= metrics[key] and metrics[key] <= 1, f"Failed -- metrics['{key}'] was not a uniform random number"
-
-    print("Passed")
-
-    print("Test 4: ", end='')
-    lst = []
-    alg.register_pre_hook(prehook(lst))
-    alg.register_post_hook(posthook(lst))
-    metrics = alg()
-    assert "Pre Call Hook" in lst,"Failed -- Pre call hook not run"
-    assert lst[0] == "Pre Call Hook","Failed -- Pre call hook not in right order"
-    assert "Post Call Hook" in lst,"Failed -- Post call hook not run"
-    assert lst[1] == "Post Call Hook","Failed -- Post call hook not in right order"
-
-    alg.register_pre_hook(prehook(lst))
-    alg.register_post_hook(posthook(lst))
-    lst.clear()
-    metrics = alg()
-    assert "Pre Call Hook" in lst,"Failed -- Pre call hook not run"
-    assert lst[0] == "Pre Call Hook","Failed -- Pre call hook not in right order"
-    assert "Pre Call Hook" in lst,"Failed -- Pre call hook not run"
-    assert lst[1] == "Pre Call Hook","Failed -- Pre call hook not in right order"
-
-    assert "Post Call Hook" in lst,"Failed -- Post call hook not run"
-    assert lst[2] == "Post Call Hook","Failed -- Post call hook not in right order"
-    assert "Post Call Hook" in lst,"Failed -- Post call hook not run"
-    assert lst[3] == "Post Call Hook","Failed -- Post call hook not in right order"
-
-    print("Passed")
 
 
 old = '''
