@@ -80,7 +80,7 @@ class Trainer(object):
         test_data = DataLoader(testing_dataset, ...)
 
         trainer = Trainer(
-          visualize=YourVisualizer(),  # Typically Plotter() or Saver()
+          visualizer=YourVisualizer(),  # Typically Plotter() or Saver()
           train_alg=YourTrainingAlgorithm(),
           test_alg=YourTrainingAlgorithm(eval=True)
           display_freq=...,
