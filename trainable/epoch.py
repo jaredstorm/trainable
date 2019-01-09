@@ -39,7 +39,7 @@ class Epoch(object):
         super().__init__()
         self.algorithm = algorithm
         self.loop = loop
-        self.visualize = visualizer
+        self.visualizer = visualizer
         self.evaluate = eval
         self.metrics = defaultdict(lambda: [])
 
@@ -79,10 +79,10 @@ class Epoch(object):
         self.loop = loop
 
     def set_visualizer(self, visualizer):
-        self.visualize = visualizer
+        self.visualizer = visualizer
 
     def get_visualizer(self):
-        return self.visualize
+        return self.visualizer
 
     ####################################################################################################################
     # Training/Validation Toggles                                                                                      #
@@ -145,7 +145,7 @@ class DefaultEpoch(Epoch):
             if self.evaluate:
                 self.append_metrics(metrics)
             else:
-                self.visualize(session.model, batch, device)
+                self.visualizer(session.model,batch,device)
                 self.loop.update(session.epoch, metrics)
 
         if self.evaluate:
