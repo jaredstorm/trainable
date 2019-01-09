@@ -80,7 +80,7 @@ class Trainer(object):
         test_data = DataLoader(testing_dataset, ...)
 
         trainer = Trainer(
-          visualizer=YourVisualizer(),  # Typically Plotter() or Saver()
+          visualize=YourVisualizer(),  # Typically Plotter() or Saver()
           train_alg=YourTrainingAlgorithm(),
           test_alg=YourTrainingAlgorithm(eval=True)
           display_freq=...,
@@ -104,7 +104,7 @@ class Trainer(object):
         self.epoch = args.pop('epoch',DefaultEpoch())
         self.epoch.set_visualizer(args.pop('visualizer', Plotter()))
         self.epoch.loop = self.loop
-        self.epoch.set_algorithm(args.pop('algorithm',Mean()))
+        self.epoch.set_algorithm(args.pop('algorithm', Mean()))
 
         # Set up Validation Management
         self.validation = ValidationManager(self.epoch)
@@ -222,7 +222,7 @@ class Trainer(object):
 
     def set_visualizer(self, visualizer):
         """Inject a different visualization strategy."""
-        self.visualize = visualizer
+        self.epoch.set_visualizer(visualizer)
 
     ##############################################################################
     # Tunable Behaviors                                                          #
@@ -237,7 +237,7 @@ class Trainer(object):
 
     def set_visualize_frequency(self, frequency):
         """Set how often to sample visuals, in batches."""
-        self.epoch.visualizer.frequency = frequency
+        self.epoch.set_visualize_frequency(frequency)
 
     def set_autosave_frequency(self, frequency):
         """Set how often the session saves in epochs."""
