@@ -37,7 +37,10 @@ class Epoch(object):
 
     def __init__(self, algorithm=None, loop=None, visualizer=None, eval=False):
         super().__init__()
-        self.__dict__.update(locals())
+        self.algorithm = algorithm
+        self.loop = loop
+        self.visualize = visualizer
+        self.evaluate = eval
         self.metrics = defaultdict(lambda: [])
 
     def __call__(self, session, data, device):
@@ -76,28 +79,28 @@ class Epoch(object):
         self.loop = loop
 
     def set_visualizer(self, visualizer):
-        self.visualizer = visualizer
+        self.visualize = visualizer
 
     def get_visualizer(self):
-        return self.visualizer
+        return self.visualize
 
     ####################################################################################################################
     # Training/Validation Toggles                                                                                      #
     ####################################################################################################################
 
-    def validate(self):
+    def eval(self):
         """Shift to evalulation mode."""
-        self.eval = True
+        self.evaluate = True
 
         if type(self.algorithm) in (list, tuple):
             for alg in self.algorithm:
-                alg.validate()
+                alg.eval()
         else:
-            self.algorithm.validate()
+            self.algorithm.eval()
 
     def train(self):
         """Shift to training mode."""
-        self.eval = False
+        self.evaluate = False
         if type(self.algorithm) in (list, tuple):
             for alg in self.algorithm:
                 alg.train()
@@ -122,7 +125,7 @@ class Epoch(object):
         return metrics
 
     def clear_metrics(self):
-        self.metrics = defaultdict(lambda: [])
+        self._metrics = defaultdict(lambda: [])
 
 
 class DefaultEpoch(Epoch):
@@ -139,13 +142,13 @@ class DefaultEpoch(Epoch):
 
             session.append_metrics(metrics)
 
-            if self.eval:
+            if self.evaluate:
                 self.append_metrics(metrics)
             else:
-                self.visualizer(session.model, batch, device)
+                self.visualize(session.model, batch, device)
                 self.loop.update(session.epoch, metrics)
 
-        if self.eval:
+        if self.evaluate:
             averages = self.average_metrics()
             self.clear_metrics()
             return averages

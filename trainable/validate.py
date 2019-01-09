@@ -37,7 +37,7 @@ class ValidationManager(object):
         if self.counter == self.frequency:
             self.counter = 0
 
-            self.epoch.validate()
+            self.epoch.eval()
             metrics = self.epoch(session, data, device)
             self.epoch.train()
 

@@ -75,7 +75,7 @@ class Algorithm(object):
     """
 
     def __init__(self):
-        super(Algorithm,self).__init__()
+        super(Algorithm, self).__init__()
         self._eval = False
         self._eval_prefix = "Validation "
         self._pre_hooks = []
@@ -448,7 +448,7 @@ class Algorithm(object):
     def key(self, key):
         return ('Validation ' if self.eval else '') + key
 
-    def validate(self):
+    def eval(self):
         self.eval = True
 
     def train(self):
