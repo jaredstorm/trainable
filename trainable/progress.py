@@ -1,9 +1,6 @@
 from tqdm import tqdm
 from collections import defaultdict
 
-import random
-
-
 class ProgressManager(object):
     def __init__(self, display_freq=1):
         super().__init__()
