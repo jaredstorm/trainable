@@ -8,7 +8,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='trainable',
-    version='0.1.4.dev19',
+    version='0.1.4.dev20',
     description='The flexible training toolbox',
     long_description=long_description,
     long_description_content_type='text/markdown',
