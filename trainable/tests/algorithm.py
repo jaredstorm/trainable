@@ -2,7 +2,13 @@ from unittest import TestCase
 
 import torch
 import random
-from trainable.algorithm import Algorithm, AlgorithmList
+from trainable.algorithm import Algorithm, AlgorithmList, Mean
+
+# TODO run tests on AlgorithmList
+
+################################################################################
+# TEST CASES                                                                   #
+################################################################################
 
 
 class BasicTest(TestCase):
@@ -22,6 +28,7 @@ class BasicTest(TestCase):
                 "metrics types incorrect. expected: float, actual: {type(metrics[key])}"
             )
 
+
 class BasicCompositionTest(TestCase):
     def test(self):
         alg = AlgorithmList(TestAlgorithmA(), TestAlgorithmB())
@@ -38,6 +45,7 @@ class BasicCompositionTest(TestCase):
                 type(metrics[key]) is float,
                 "metrics types incorrect. expected: float, actual: {type(metrics[key])}"
             )
+
 
 class LayeredCompostionTest(TestCase):
     def test(self):
@@ -59,6 +67,7 @@ class LayeredCompostionTest(TestCase):
                 "metrics types incorrect. expected: float, actual: {type(metrics[key])}"
             )
 
+
 class HookTest(TestCase):
     def test(self):
         lst = []
@@ -76,6 +85,7 @@ class HookTest(TestCase):
         self.assertTrue(lst[0] == pre, "Pre call hook not in right order")
         self.assertTrue(post in lst, "Post call hook not run")
         self.assertTrue(lst[1], "Post call hook not in right order")
+
 
 class AdvancedHookTest(TestCase):
     def test(self):
@@ -100,6 +110,7 @@ class AdvancedHookTest(TestCase):
         self.assertTrue(lst[2] == post, "Post call hook not in right order")
         self.assertTrue(lst[3] == post, "Pre call hook not in right order")
 
+
 class TestEvalTest(TestCase):
     def test(self):
         alg = TestAlgorithmA()
@@ -110,6 +121,7 @@ class TestEvalTest(TestCase):
 
         alg.train()
         self.assertFalse(alg._eval, "Algorithm did not change to training mode")
+
 
 class TestEvalAdvancedTest(TestCase):
     def test(self):
@@ -125,6 +137,7 @@ class TestEvalAdvancedTest(TestCase):
         self.assertFalse(alg.alg_b._eval, "Algorithm B was not set to training.")
         self.assertFalse(alg._eval, "Composed Algorithm was not set to training.")
 
+
 class RenameTest(TestCase):
     def test(self):
         alg = TestAlgorithmA()
@@ -136,6 +149,22 @@ class RenameTest(TestCase):
                 alg._eval_prefix in key,
                 "metrics not renamed"
             )
+
+        alg = Mean()
+        model = torch.nn.Linear(10, 10)
+        batch = torch.randn(8, 10)
+        device = torch.device('cpu')
+
+        metrics = alg(model, batch, device)
+        for key in metrics:
+            self.assertFalse(
+                alg._eval_prefix in key,
+                "metrics renamed, but should not have been."
+            )
+
+################################################################################
+# TEST RESOURCES                                                               #
+################################################################################
 
 
 class TestAlgorithmA(Algorithm):
@@ -172,6 +201,7 @@ class ComposedAlgorithm(Algorithm):
 
     def run(self):
         return self.alg_a(), self.alg_b()
+
 
 def prehook(lst):
     def hook():
