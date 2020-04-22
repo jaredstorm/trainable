@@ -37,28 +37,32 @@ Then you simply instantiate your model, dataset, and optimizer...
 device = torch.device('cuda')
 
 model = MyModel().to(device)
-optim = FancyPantsOptimizer(model.parameters(), lr=1e-4)
+optim = Adam(model.parameters(), lr=1e-4)
 
 train_data = DataLoader(SomeTrainingDataset('path/to/your/data'), batch_size=32)
 test_data = DataLoader(SomeTestingDataset('path/to/your/data'), batch_size=32)
 ```
 
-...and let trainable take care of the rest!
+...and let Trainable take care of the rest!
 ```python
 trainer = Trainer(
-  visualizer=MyVisualizer(),  # Typically Plotter() or Saver()
-  train_alg=MyFancyAlgorithm(),
-  test_alg=MyFancyAlgorithm(eval=True)
-  display_freq=1,
+  visualizer=Plotter(),  # Plots a sample image every so many steps.
+  train_alg=MSEAlgorithm(), # Your custom algorithm
+  test_alg=MSEAlgorithm(eval=True) # A testing algorithm
+  display_freq=1, 
   visualize_freq=10,
   validate_freq=10,
   autosave_freq=10,
   device=device
 )
 
+# You can save off your training session for later as well.
 save_path = "desired/save/path/for/your/session.sesh"
+
+# Pass your model into the trainer along with your
 trainer.start_session(model, optim, path)
 
+# Give your session a name and a description
 trainer.name_session('Name')
 
 trainer.describe_session("""
@@ -66,10 +70,11 @@ A beautiful detailed description of what the heck
 you were trying to accomplish with this training.
 """)
 
+# let it run!
 metrics = trainer.train(train_data, test_data, epochs=200)
 ```
 
-Plotting your data is simple as well:
+Plotting the data you've accumulated over training is is simple as well:
 ```python
 import matplotlib.pyplot as plt
 
